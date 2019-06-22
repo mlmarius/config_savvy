@@ -97,11 +97,11 @@ def test_one(caplog):
 
 def test_builder_methods():
     c = Config()
-    c.option('option1', 1)
+    c.add_option('option1', 1)
     assert c.section is None
     assert c['option1'] is 1
     c.section = 'SECTION1'
-    c.option('option2', 2)
+    c.add_option('option2', 2)
     opt = c.get_option('option2', 'SECTION1')
     assert opt.section == 'SECTION1'
 

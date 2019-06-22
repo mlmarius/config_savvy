@@ -113,7 +113,7 @@ class Config(BaseConfig):
         # will automatically set the following section to all newly appended ConfigOptions
         self.section = section
 
-    def option(
+    def add_option(
             self,
             name: str,
             default=None,
@@ -135,6 +135,9 @@ class Config(BaseConfig):
             section=self.section
         ))
         return self
+
+    def add_reader(self, reader: BaseConfig):
+        self.readers.append(reader)
 
     @property
     def options(self) -> Set[Option]:
