@@ -1,2 +1,3 @@
-# config_savvy
-Python 3.7 configuration utilities
+# config_utils
+
+Configuration utilities
