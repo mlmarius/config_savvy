@@ -154,6 +154,9 @@ def test_addition():
 
 
 def test_cache():
+
+    os.environ.clear()
+
     os.environ['OPTION2'] = '33'
     os.environ['OPTION3'] = 'spam'
 
@@ -173,8 +176,27 @@ def test_cache():
     config.section = "OTHER"
     config.add_option('option4', 'yes')
 
-    # cache = config.cache()
-    # assert cache == {}
+    cache = config.cache()
+    assert cache['option1'] == 1
+    assert cache['User'] == 'hg'
+
+    # warning. section bitbucket.org does not have this option so it goes to DEFAULT
+    # if the DEFAULT section is defined
+    assert cache['ForwardX11'] == 'yes'
+    assert cache['Port'] == '50022'
+    assert cache.get('option4', 'OTHER') == 'yes'
+
+    expected = {
+        None: {
+            'ForwardX11': 'yes',
+            'Port': '50022',
+            'User': 'hg',
+            'option1': 1
+        },
+        'OTHER': {'option4': 'yes'}
+    }
+    assert cache.dict == expected
+
 
 def test_ini_reader():
     reader = IniConfigReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])

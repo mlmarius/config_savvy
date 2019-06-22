@@ -10,13 +10,17 @@ from typing import List, Callable, Dict, Union, Tuple, Any, Set
 LOGGER = logging.getLogger('config_savvy')
 
 
+class UnsetParameter:
+    pass
+
+
 class Option:
 
     def __init__(
             self,
             name: str,
-            default=None,
-            value=None,
+            default=UnsetParameter,
+            value=UnsetParameter,
             processor: Callable = None,
             section: str = None,
             description: str = None,
@@ -42,27 +46,44 @@ class Option:
 
     @property
     def value(self):
-        if self._value:
+        if self._value is not UnsetParameter:
             return self._processor(self._value)
+        raise UnassignedParameterError
 
     @property
     def default(self):
-        if self._default:
+        if self._default is not UnsetParameter:
             return self._processor(self._default)
+        raise UnassignedParameterError
 
     def bind(self, resolver: BaseConfig):
         self._resolver = resolver
         return self
 
     def resolve(self):
-        return self._resolver.resolve(self)
+        try:
+            return self.value
+        except UnassignedParameterError:
+            pass
+
+        try:
+            if self._resolver:
+                return self._resolver.resolve(self)
+            raise UnassignedOptionError
+        except UnassignedOptionError as e:
+            try:
+                return self.default
+            except UnassignedParameterError:
+                e.attempts.append(f'No default value for option {self.name}')
+                raise e
 
 
 class BaseConfig(ABC):
 
     def __init__(self, options: List[Option] = None, readers: List[BaseConfig] = None):
         self.readers = readers or []
-        self._options = set(options or [])
+        options = options or []
+        self._options = set([option.bind(self) for option in options])
 
     def get_flat(self) -> Tuple[Set, List]:
         if isinstance(self, BaseConfigReader):
@@ -105,8 +126,8 @@ class Config(BaseConfig):
     def add_option(
             self,
             name: str,
-            default=None,
-            value=None,
+            default=UnsetParameter,
+            value=UnsetParameter,
             processor: Callable = None,
             section: str = None,
             description: str = None
@@ -122,7 +143,7 @@ class Config(BaseConfig):
             processor=processor,
             description=description,
             section=self.section
-        ))
+        ).bind(self))
         return self
 
     def add_reader(self, reader: BaseConfig):
@@ -172,9 +193,6 @@ class Config(BaseConfig):
             except UnassignedOptionError as e:
                 attempts += e.attempts
 
-        if option.default is not None:
-            return option.default
-
         raise UnassignedOptionError(f"{option.name} - could not be resolved", attempts)
 
     def __getitem__(self, item: Union[str, Tuple[str, str], Option]) -> Any:
@@ -188,30 +206,45 @@ class Config(BaseConfig):
                 name, section = item
                 item = self.get_option(name, section)
 
-        if item.value is not None:
-            return item.value
-
         try:
             return item.resolve()
         except ConfigError as e:
             LOGGER.error(e)
-            if item.default is not None:
-                return item.default
             for message in e.attempts:
                 LOGGER.warning(message)
             raise e
 
-    def cache(self) -> Dict[str, Union[str, bool, int, float]]:
+    def cache(self) -> ConfigCache:
         output = defaultdict(dict)
         for option in self.options:
-            output[option.section][option.name] = self[option]
-        return dict(output)
+            output[option.section][option.name] = option.resolve()
+        return ConfigCache(dict(output))
+
+
+class ConfigCache:
+
+    def __init__(self, resolved_options: Dict, section=None):
+        self._index = resolved_options
+        self.section = section              # Default section to retrieve from
+
+    def __getitem__(self, name):
+        return self._index[self.section][name]
+
+    def section(self, section):
+        return self._index[section]
+
+    def get(self, name, section=None):
+        return self._index[section][name]
+
+    @property
+    def dict(self):
+        return self._index
 
 
 class ConfigError(Exception):
     def __init__(self, message=None, attempts=None):
         self.message = message
-        self.attempts = attempts
+        self.attempts = attempts or []
 
 
 class UndefinedOptionError(ConfigError):
@@ -219,6 +252,10 @@ class UndefinedOptionError(ConfigError):
 
 
 class UnassignedOptionError(ConfigError):
+    pass
+
+
+class UnassignedParameterError(ConfigError):
     pass
 
 
