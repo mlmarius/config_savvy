@@ -10,18 +10,7 @@ from typing import List, Callable, Dict, Union, Tuple, Any, Set
 LOGGER = logging.getLogger('config_savvy')
 
 
-class BaseOption(ABC):
-    def __hash__(self):
-        return hash((self.name, self.section))
-
-    def __eq__(self, other: Option):
-        return self.section == other.section and self.name == other.name
-
-    def __str__(self):
-        return self.name
-
-
-class Option(BaseOption):
+class Option:
 
     def __init__(
             self,
@@ -30,14 +19,26 @@ class Option(BaseOption):
             value=None,
             processor: Callable = None,
             section: str = None,
-            description: str = None
+            description: str = None,
+            resolver: BaseConfig = None
     ):
+        super().__init__()
         self.name = name
         self._processor = processor or (lambda x: x)
         self._default = default
         self.section = section
         self._value = value
         self.description = description
+        self._resolver = resolver
+
+    def __hash__(self):
+        return hash((self.name, self.section))
+
+    def __eq__(self, other: Option):
+        return self.section == other.section and self.name == other.name
+
+    def __str__(self):
+        return self.name
 
     @property
     def value(self):
@@ -49,20 +50,12 @@ class Option(BaseOption):
         if self._default:
             return self._processor(self._default)
 
-
-class BoundOption(BaseOption):
-    def __init__(self,
-                 config_option: Option,
-                 reader: BaseConfig
-                 ):
-        self._option = config_option
-        self._reader = reader
-
-    def __getattr__(self, name):
-        return self._option.__getattribute__(name)
+    def bind(self, resolver: BaseConfig):
+        self._resolver = resolver
+        return self
 
     def resolve(self):
-        return self._reader.resolve(self)
+        return self._resolver.resolve(self)
 
 
 class BaseConfig(ABC):
@@ -71,7 +64,7 @@ class BaseConfig(ABC):
         self.readers = readers or []
         self._options = set(options or [])
 
-    def get_flat(self) -> Union[Set, List]:
+    def get_flat(self) -> Tuple[Set, List]:
         if isinstance(self, BaseConfigReader):
             return set(), [self]
 
@@ -91,7 +84,7 @@ class BaseConfig(ABC):
         self._options = options
 
     @abstractmethod
-    def get_option(self, name: str, section: str = None) -> BoundOption:
+    def get_option(self, name: str, section: str = None) -> Option:
         pass
 
     @abstractmethod
@@ -100,10 +93,6 @@ class BaseConfig(ABC):
 
     @abstractmethod
     def options(self) -> Set[Option]:
-        pass
-
-    @abstractmethod
-    def resolve(self, option: BaseOption):
         pass
 
 
@@ -155,10 +144,10 @@ class Config(BaseConfig):
         self._options = options
         self.readers = readers
 
-    def get_option(self, name: str, section: str = None) -> BoundOption:
+    def get_option(self, name: str, section: str = None) -> Option:
         for option in self._options:
             if option.name == name and option.section == section:
-                return BoundOption(option, self)
+                return option.bind(self)
         else:
             # reverse the readers so that config operations
             # can work like so:
@@ -235,7 +224,7 @@ class UnassignedOptionError(ConfigError):
 
 class BaseConfigReader(BaseConfig):
 
-    def get_option(self, name: str, section: str = None) -> BoundOption:
+    def get_option(self, name: str, section: str = None) -> Option:
         raise UndefinedOptionError()
 
     @abstractmethod
@@ -249,14 +238,15 @@ class BaseConfigReader(BaseConfig):
 
 class EnvConfigReader(BaseConfigReader):
 
-    def resolve(self, option: BaseOption):
+    def resolve(self, option: Option):
         try:
             return os.environ[self._env_name(option.name)]
         except KeyError:
             raise UnassignedOptionError(
                 attempts=[
-                    f'{self.__class__.__name__} | searching for {option.name} | could not find {self._env_name(option.name)}'
-            ])
+                    f'{self.__class__.__name__} | searching for {option.name} \
+                    | could not find {self._env_name(option.name)}'
+                ])
 
     def __init__(self, prefix=None):
         super().__init__()
