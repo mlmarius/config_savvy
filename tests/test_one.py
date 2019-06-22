@@ -171,7 +171,7 @@ def test_cache():
     )
 
     config.section = "OTHER"
-    config.option('option4', 'yes')
+    config.add_option('option4', 'yes')
 
     # cache = config.cache()
     # assert cache == {}
