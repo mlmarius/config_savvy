@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='config_savvy',  # Required
+    name='config-savvy',  # Required
     version='0.0.1',  # Required
     description='Configuration utilities',  # Required
     long_description=long_description,  # Optional
