@@ -55,7 +55,7 @@ class Option:
             processor: Callable = None,
             section: str = UnsetParameter,
             description: str = None,
-            resolver: OptionResolver = None
+            resolver: Config = None
     ):
         super().__init__()
         self.name = name
@@ -65,20 +65,20 @@ class Option:
         self._value = value
         self._resolved = resolved
         self.description = description
-        self._resolver = resolver
+        self.resolver = resolver
         self.attempts = []
 
     def __hash__(self):
-        return hash((self.name, self.section))
+        return hash((self.name, self.section, self.resolver))
 
     def __eq__(self, other: Option):
-        return self.section == other.section and self.name == other.name
+        return self.section == other.section and self.name == other.name and self.resolver == other.resolver
 
     def __str__(self):
-        return self.name
+        return f'{self.name}@{self.resolver}'
 
     def bind(self, resolver: OptionResolver):
-        self._resolver = resolver
+        self.resolver = resolver
         return self
 
     def read(self):
@@ -98,9 +98,9 @@ class Option:
         raise UnassignedOptionError(f'Could not read value of {self.name}')
 
     def resolve(self):
-        if self._resolver is None:
+        if self.resolver is None:
             raise UnassignedResolverError(f'No resolver for {self.name}')
-        self._resolved = self._resolver.read(self, self.section)
+        self._resolved = self.resolver.read(self, self.section)
         return self
 
 
@@ -111,12 +111,16 @@ class OptionResolver(ABC):
 
 
 class Config(OptionResolver):
-    def __init__(self, resolvers: List[OptionResolver] = None, options: List[Option] = None, section: str = None):
+    def __init__(self, resolvers: List[OptionResolver] = None, options: List[Option] = None, section: str = None, name=None):
         # will automatically set the following section to all newly appended ConfigOptions
         self.section = section
         self._options = set()
         self.resolvers = resolvers or []
         self.add_options(options or [])
+        self.name = name
+
+    def __str__(self):
+        return self.name
 
     def add_options(self, options: List[Option]) -> Config:
         for option in options:
@@ -143,7 +147,8 @@ class Config(OptionResolver):
             # reverse the readers so that config operations
             # can work like so:
             # big_config = defaults + config1 + config2
-            resolvers=[other, self]
+            resolvers=[other, self],
+            name = f'{self.name} + {other.name}'
         )
 
     def get_flat(self) -> Tuple[Set, List]:
@@ -160,37 +165,63 @@ class Config(OptionResolver):
 
     # all children options and readers now belong to this
     def flatten(self):
-        options, readers = self.get_flat()
+        options, resolvers = self.get_flat()
         self._options = options
-        self.resolvers = readers
+        self.resolvers = resolvers
+
+    def set_option(self, option: Option):
+        try:
+            old = self.get_option(option.name, option.section)
+            old.resolver.remove_option(old)
+            old.resolver.add_option(option)
+        except UndefinedOptionError:
+            self.add_option(option)
+        return self
+
+    def remove_option(self, option: Union[str, Option], section: str = UnsetParameter):
+        option = self.get_option(option, section)
+        option.resolver.discard(option)
+        return self
+
+    def discard(self, option: Option):
+        self._options.discard(option)
+
+    def _get_option_deep(self, *args, **kwargs) -> Option:
+        # search deeper for this option
+        # only config resolvers hold options
+        for resolver in [r for r in self.resolvers if isinstance(r, Config)]:
+            try:
+                return resolver.get_option(*args, **kwargs)
+            except UndefinedOptionError:
+                pass
+        raise UndefinedOptionError
 
     def get_option(self, option: Union[str, Option], section: str = UnsetParameter) -> Option:
         # find the option in our resolver hierarchy
         # if multiple resolver define an option then the newly added ones have precedence
 
         if isinstance(option, Option):
-            return option
+            # when searching by instance we only return the option
+            # if the resolver is one of our children
+            if option in self._options:
+                return option
+            else:
+                return self._get_option_deep(option)
 
-        # look for option in our default section
-        if isinstance(option, str):
+        elif isinstance(option, str):
+            # find the option locally
             name = option
             if section is UnsetParameter:
+                # look for option in our default section
                 section = self.section
-        else:
-            raise ConfigError('Can not get requested option')
 
-        for option in self._options:
-            if option.name == name and option.section == section:
-                return option
+            for option in self._options:
+                if option.name == name and option.section == section:
+                    return option
         else:
-            # search deeper for this option
-            # only config resolver hold options
-            for resolver in filter(lambda x: isinstance(x, Config), self.resolvers):
-                try:
-                    return resolver.get_option(name, section)
-                except UndefinedOptionError:
-                    continue
-            raise UnassignedOptionError(f'Undefined option {name}')
+            raise ConfigError('Can not retrieve option')
+
+        return self._get_option_deep(option, section)
 
     def read(self, option: Union[str, Option], section: str = UnsetParameter) -> Any:
         # determine the value of an option only using the local readers

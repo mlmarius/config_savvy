@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from config_savvy import Config, EnvReader, IniReader, Option, ConfigError, UnassignedOptionError
+from config_savvy import Config, EnvReader, IniReader, Option, ConfigError, UndefinedOptionError
 
 
 def test_one(caplog):
@@ -54,7 +54,7 @@ def test_one(caplog):
 
     # should raise value error because we tried to access an option
     # that is not defined in the config
-    with pytest.raises(UnassignedOptionError):
+    with pytest.raises(UndefinedOptionError):
         assert config3['User'] == 'hg'
 
 
@@ -194,6 +194,77 @@ def test_none_works():
         ]
     )
     assert config['option1'] is None
+
+def test_get_option():
+
+    config1 = Config(name="config1", options=[
+        Option('option1', 1)
+    ])
+
+    # get it by name
+    opt = config1.get_option('option1')
+    assert opt.read() is 1
+
+    # get it by instance
+    opt2 = config1.get_option(opt)
+    assert opt2.read() is 1
+
+    config2 = Config(name="config2", options=[
+        Option('option1', 2)
+    ])
+
+    # option1 is now shadowed by config2's option1
+    config3 = config1 + config2
+
+    # but when we search for an option by instance
+    # we get the exact instance
+    opt3 = config3.get_option(opt)
+    assert opt3.read() is 1
+
+    # when we query by option name
+    # we get the "topmost" option
+    assert config3['option1'] is 2
+
+
+def test_add_remove_options():
+
+    config = Config()
+    opt1 = Option('option1', 1)
+    config.set_option(opt1)
+    assert config['option1'] == 1
+    config.remove_option('option1')
+    with pytest.raises(UndefinedOptionError):
+        assert config['option1'] == 1
+
+    config1 = Config(name="config1")
+    option11 = Option('option11', 11)
+    option12 = Option('option12', 12)
+    config1.add_options([
+        option11, option12
+    ])
+
+    config2 = Config(name="config2")
+    option21 = Option('option21', 21)
+    option22 = Option('option22', 22)
+    config2.add_options([
+        option21, option22,
+        Option('option11', 'test')  # config2 shadows one of config1's options
+    ])
+
+    config3 = config1 + config2
+    assert config3['option11'] == 'test', "Option was not shadowed"
+
+    # once we remove the shadowing
+    # option we get the base option again
+    config3.remove_option('option11')
+    assert config3['option11'] == 11
+
+    config1.set_option(Option('option11', 'another value'))
+
+    assert config1['option11'] == 'another value'
+
+    # config3 also has the updated value
+    assert config3['option11'] == 'another value'
 
 
 def test_ini_reader():
