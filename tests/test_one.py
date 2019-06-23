@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from config_savvy import Config, EnvConfigReader, IniConfigReader, Option, ConfigError, UnassignedOptionError
+from config_savvy import Config, EnvReader, IniReader, Option, ConfigError, UnassignedOptionError
 
 
 def test_one(caplog):
@@ -22,10 +22,10 @@ def test_one(caplog):
             # it should return the environment value
             Option('option3', 3)
         ],
-        readers=[
+        resolvers=[
             # WARNING: When searching in environment, option names
             # are uppercased
-            EnvConfigReader()
+            EnvReader()
         ]
     )
 
@@ -39,8 +39,8 @@ def test_one(caplog):
             Option('option3', value='cat'),
             Option('option4', 4)
         ],
-        readers=[
-            IniConfigReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
+        resolvers=[
+            IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
         ]
     )
 
@@ -57,27 +57,15 @@ def test_one(caplog):
     with pytest.raises(UnassignedOptionError):
         assert config3['User'] == 'hg'
 
-    # make new config defining the User option
-    config4 = config3 + Config([
-        Option('User'),
 
-        # test if configparser picks up stuff in the DEFAULT
-        # config section
-        Option('ForwardX11'),
-
-        # define an option that is in the second section
-        # from our scanned sections list
-        Option('Port'),
-
-        Option('Undefined')
-    ])
-
-    with pytest.raises(ConfigError):
-        assert config4['User'] == 'hg'
-
-    config4.flatten()
-    assert config4['User'] == 'hg'
-
+    config4 = config1 + Config(
+        [IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])],
+        options=[
+            Option('ForwardX11'),
+            Option('Port'),
+            Option('Undefined')
+        ]
+    )
 
     # Carefull! Even if you define searching in multiple sections,
     # once a value is not found in the first section, then it will
@@ -95,15 +83,16 @@ def test_one(caplog):
         assert config4['Undefined']
 
 
-def test_builder_methods():
+def test_add_option():
     c = Config()
-    c.add_option('option1', 1)
+    c.add_option(Option('option1', 1))
     assert c.section is None
     assert c['option1'] is 1
     c.section = 'SECTION1'
-    c.add_option('option2', 2)
+    c.add_option(Option('option2', 2))
     opt = c.get_option('option2', 'SECTION1')
     assert opt.section == 'SECTION1'
+    assert opt.read() == 2
 
 
 def test_addition():
@@ -117,8 +106,8 @@ def test_addition():
             Option('ForwardX11'),
             Option('Port'),
         ],
-        readers=[
-            EnvConfigReader(),
+        resolvers=[
+            EnvReader(),
         ]
     )
 
@@ -129,8 +118,8 @@ def test_addition():
         options=[
             Option('User'),
         ],
-        readers=[
-            IniConfigReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
+        resolvers=[
+            IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
         ]
     )
 
@@ -141,8 +130,8 @@ def test_addition():
             Option('Port'),
             Option('User')
         ],
-        readers=[
-            EnvConfigReader(),
+        resolvers=[
+            EnvReader(),
         ]
     )
 
@@ -167,14 +156,14 @@ def test_cache():
             Option('ForwardX11'),
             Option('Port'),
         ],
-        readers=[
-            EnvConfigReader(),
-            IniConfigReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
+        resolvers=[
+            EnvReader(),
+            IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
         ]
     )
 
     config.section = "OTHER"
-    config.add_option('option4', 'yes')
+    config.add_option(Option('option4', 'yes'))
 
     cache = config.cache()
     assert cache['option1'] == 1
@@ -198,7 +187,16 @@ def test_cache():
     assert cache.dict == expected
 
 
+def test_none_works():
+    config = Config(
+        options=[
+            Option('option1', None),
+        ]
+    )
+    assert config['option1'] is None
+
+
 def test_ini_reader():
-    reader = IniConfigReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
+    reader = IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
     assert reader._config.sections() == ['bitbucket.org', 'topsecret.server.com']
 
