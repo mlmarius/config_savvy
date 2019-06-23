@@ -244,7 +244,8 @@ class Config(OptionResolver):
 
         raise UnassignedOptionError
 
-    def __getitem__(self, option: Union[str, Tuple[str, str], Option]) -> Any:
+    def __getitem__(self, option: str) -> Any:
+        # use this to extract options from the default section
         return self.get_option(option).read()
 
     def cache(self) -> ConfigCache:
