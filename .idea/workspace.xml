@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6c6334fc-a981-4108-83e9-608f30c3ee25" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/config_savvy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config_savvy/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,11 +12,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tests/test_one.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="265" column="40" selection-start-line="265" selection-start-column="40" selection-end-line="265" selection-end-column="40" />
+            <state relative-caret-position="337">
+              <caret line="271" column="81" selection-start-line="271" selection-start-column="81" selection-end-line="271" selection-end-column="81" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -38,11 +38,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/config_savvy/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="247" column="62" selection-start-line="247" selection-start-column="62" selection-end-line="247" selection-end-column="62" />
+            <state relative-caret-position="662">
+              <caret line="166" column="22" selection-start-line="166" selection-start-column="22" selection-end-line="166" selection-end-column="22" />
               <folding>
                 <element signature="e#0#34#0" expanded="true" />
               </folding>
@@ -79,6 +79,8 @@
       <find>_get</find>
       <find>def remove</find>
       <find>should raise</find>
+      <find>getitem</find>
+      <find>def flatten</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -88,8 +90,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/setup.py" />
-        <option value="$PROJECT_DIR$/tests/test_one.py" />
         <option value="$PROJECT_DIR$/src/config_savvy/__init__.py" />
+        <option value="$PROJECT_DIR$/tests/test_one.py" />
       </list>
     </option>
   </component>
@@ -183,7 +185,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1561211164548</updated>
-      <workItem from="1561211165898" duration="31485000" />
+      <workItem from="1561211165898" duration="37793000" />
     </task>
     <task id="LOCAL-00001" summary="fist commit">
       <created>1561211306107</created>
@@ -234,43 +236,50 @@
       <option name="project" value="LOCAL" />
       <updated>1561283311357</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="fixing flatten">
+      <created>1561301943964</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1561301943964</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Tox - 2019.06.23 at 15h 22m 09s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 28m 47s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 26m 30s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 28m 57s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 26m 38s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 35m 45s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 27m 33s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 40m 02s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 31m 50s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 40m 10s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 32m 34s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 47m 29s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 33m 33s.xml">
+    <history-entry file="Tox - 2019.06.23 at 17h 47m 36s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 37m 15s.xml">
+    <history-entry file="Tox - 2019.06.23 at 18h 03m 40s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 37m 43s.xml">
+    <history-entry file="Tox - 2019.06.23 at 18h 04m 09s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
-    <history-entry file="Tox - 2019.06.23 at 15h 39m 51s.xml">
+    <history-entry file="Tox - 2019.06.23 at 18h 10m 08s.xml">
       <configuration name="Tox" configurationId="Tox" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31485000" />
+    <option name="totallyTimeSpent" value="37793000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="821" extended-state="0" />
@@ -283,7 +292,7 @@
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="Version Control" />
       <window_info anchor="bottom" id="Python Console" weight="0.3286119" />
-      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Terminal" weight="0.3286119" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3286119" />
@@ -310,10 +319,11 @@
     <MESSAGE value="removing redundant class" />
     <MESSAGE value="all tests passing" />
     <MESSAGE value="refactoring. all tests passing" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactoring. all tests passing" />
+    <MESSAGE value="fixing flatten" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing flatten" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/config_savvy$Tox.coverage" NAME="Tox Coverage Results" MODIFIED="1561296157723" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/config_savvy$Tox.coverage" NAME="Tox Coverage Results" MODIFIED="1561302601359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
@@ -368,27 +378,27 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.tox/py3.7/lib/python3.7/site-packages/_pytest/python.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
+        <state relative-caret-position="1508">
           <caret line="173" selection-start-line="173" selection-end-line="173" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_one.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="265" column="40" selection-start-line="265" selection-start-column="40" selection-end-line="265" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/config_savvy/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="247" column="62" selection-start-line="247" selection-start-column="62" selection-end-line="247" selection-end-column="62" />
+        <state relative-caret-position="662">
+          <caret line="166" column="22" selection-start-line="166" selection-start-column="22" selection-end-line="166" selection-end-column="22" />
           <folding>
             <element signature="e#0#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_one.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="271" column="81" selection-start-line="271" selection-start-column="81" selection-end-line="271" selection-end-column="81" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
