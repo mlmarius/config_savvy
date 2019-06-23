@@ -270,4 +270,3 @@ def test_add_remove_options():
 def test_ini_reader():
     reader = IniReader('tests/config.ini', sections=['bitbucket.org', 'topsecret.server.com'])
     assert reader._config.sections() == ['bitbucket.org', 'topsecret.server.com']
-

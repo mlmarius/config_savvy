@@ -148,7 +148,7 @@ class Config(OptionResolver):
             # can work like so:
             # big_config = defaults + config1 + config2
             resolvers=[other, self],
-            name = f'{self.name} + {other.name}'
+            name=f'{self.name} + {other.name}'
         )
 
     def get_flat(self) -> Tuple[Set, List]:
@@ -166,7 +166,7 @@ class Config(OptionResolver):
     # all children options and readers now belong to this
     def flatten(self):
         options, resolvers = self.get_flat()
-        self._options = options
+        self._options = set([option.bind(self) for option in options])
         self.resolvers = resolvers
 
     def set_option(self, option: Option):
