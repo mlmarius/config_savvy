@@ -219,7 +219,7 @@ class Config(OptionResolver):
                 if option.name == name and option.section == section:
                     return option
         else:
-            raise ConfigError('Can not retrieve option')
+            raise ConfigError(f'Can not retrieve option {Option}')
 
         return self._get_option_deep(option, section)
 
